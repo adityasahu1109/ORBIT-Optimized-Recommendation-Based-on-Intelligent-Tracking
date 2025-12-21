@@ -1,0 +1,19 @@
+# Data Manipulation
+pandas
+numpy
+
+# Machine Learning & Recommender Systems
+scikit-learn
+scikit-surprise
+torch  # Added for GPU acceleration
+
+# Backend API
+fastapi
+uvicorn
+pydantic
+
+# Database
+sqlalchemy
+
+# Utilities
+joblib

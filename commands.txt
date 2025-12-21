@@ -1,0 +1,10 @@
+D:
+cd D:\Projects\orbit_recommender
+conda activate orbit
+
+
+streamlit run frontend/app.py
+
+
+
+uvicorn app.main:app --reload
