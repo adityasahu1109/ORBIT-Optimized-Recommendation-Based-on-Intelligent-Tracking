@@ -8,9 +8,9 @@ const Navbar = () => {
   const handleSearch = (e) => {
     e.preventDefault();
     if (query.trim()) {
-      // Navigate to the search page with the query in the URL
+      // Navigate to search results
       navigate(`/search?q=${encodeURIComponent(query)}`);
-      setQuery(""); // Clear input after search
+      setQuery(""); // Clear input
     }
   };
 
@@ -19,7 +19,7 @@ const Navbar = () => {
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           
-          {/* Logo */}
+          {/* Brand Logo */}
           <Link to="/" className="flex items-center gap-2">
             <span className="text-2xl">🪐</span>
             <span className="text-xl font-bold text-gray-900 tracking-tight">
@@ -27,7 +27,7 @@ const Navbar = () => {
             </span>
           </Link>
 
-          {/* Search Bar */}
+          {/* Search Bar (Hidden on small mobile screens) */}
           <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-lg mx-8 relative">
             <input
               type="text"
@@ -44,12 +44,21 @@ const Navbar = () => {
             </button>
           </form>
 
-          {/* User Profile (Static for now) */}
+          {/* Right Side Actions */}
           <div className="flex items-center gap-4">
-            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-sm">
+            
+            {/* Cart Link - NEW */}
+            <Link to="/cart" className="flex items-center gap-1 text-gray-600 hover:text-blue-600 font-medium transition-colors">
+              <span className="text-xl">🛒</span>
+              <span>Cart</span>
+            </Link>
+
+            {/* User Profile Stub */}
+            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-sm border border-blue-200">
               U
             </div>
           </div>
+
         </div>
       </div>
     </nav>

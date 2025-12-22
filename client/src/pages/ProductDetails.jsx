@@ -6,27 +6,39 @@ import { getRecommendations, logInteraction } from '../services/api';
 const ProductDetails = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { product, userId } = location.state || {}; // Get data passed from the click
+  const { product, userId } = location.state || {}; 
 
   const [similarProducts, setSimilarProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  // State for visual feedback on button
+  const [isAdded, setIsAdded] = useState(false);
 
-  // Safety check: If someone goes to this URL directly without clicking, send them home
+  // --- RESTORED HELPER FUNCTION ---
+  // This ensures images don't break if the URL is missing or "0"
+  const getValidImage = (url, title) => {
+    if (!url || url === "0" || !url.startsWith("http")) {
+      const safeTitle = title.split(",")[0].trim().substring(0, 20).replace(/\s/g, "+");
+      return `https://placehold.co/400x300/EEE/31343C?text=${safeTitle}`;
+    }
+    return url;
+  };
+
+  // Redirect if accessed directly without state
   useEffect(() => {
     if (!product) {
       navigate('/');
     }
   }, [product, navigate]);
 
-  // Fetch "Similar Items" and Log the View
+  // Fetch Data & Log View
   useEffect(() => {
     if (product && userId) {
       const loadData = async () => {
         setLoading(true);
+        // 1. Log that the user viewed this
+        await logInteraction(userId, product.asin, 'view');
         
-        // 1. Log that the user viewed this (for the AI to learn)
-        logInteraction(userId, product.asin, 'view');
-
         // 2. Get Context-Aware Recommendations
         const results = await getRecommendations(userId, product.asin);
         setSimilarProducts(results);
@@ -37,6 +49,29 @@ const ProductDetails = () => {
       loadData();
     }
   }, [product, userId]);
+
+  // --- ADD TO CART LOGIC ---
+  const handleAddToCart = async () => {
+    if (!isAdded) {
+      // 1. Send specific "add_to_cart" signal to backend (Weight: 3.0)
+      await logInteraction(userId, product.asin, 'add_to_cart');
+      
+      // 2. Save to Browser LocalStorage
+      const existingCart = JSON.parse(localStorage.getItem('orbit_cart')) || [];
+      
+      // Check for duplicates
+      if (!existingCart.find(item => item.asin === product.asin)) {
+        const newCart = [...existingCart, product];
+        localStorage.setItem('orbit_cart', JSON.stringify(newCart));
+      }
+
+      // 3. Show visual feedback
+      setIsAdded(true);
+      
+      // 4. Reset button after 2 seconds
+      setTimeout(() => setIsAdded(false), 2000);
+    }
+  };
 
   if (!product) return null;
 
@@ -56,10 +91,10 @@ const ProductDetails = () => {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-12">
           <div className="flex flex-col md:flex-row">
             
-            {/* Left: Image */}
+            {/* Left: Image (Now using getValidImage!) */}
             <div className="md:w-1/3 bg-gray-100 p-8 flex items-center justify-center">
               <img 
-                src={product.imgUrl} 
+                src={getValidImage(product.imgUrl, product.title)} 
                 alt={product.title} 
                 className="max-w-full max-h-96 object-contain mix-blend-multiply"
               />
@@ -88,8 +123,23 @@ const ProductDetails = () => {
                 <p className="text-gray-600 leading-relaxed mb-6">
                   This product was recommended because: <span className="font-semibold text-blue-600">{product.reason || "It matches your profile"}</span>.
                 </p>
-                <button className="bg-gray-900 text-white px-8 py-3 rounded-lg hover:bg-black transition-colors text-lg font-medium w-full md:w-auto">
-                  Add to Cart
+                
+                {/* Interactive Button */}
+                <button 
+                  onClick={handleAddToCart}
+                  className={`px-8 py-3 rounded-lg transition-all text-lg font-medium w-full md:w-auto flex items-center justify-center gap-2 ${
+                    isAdded 
+                      ? "bg-green-600 text-white hover:bg-green-700" 
+                      : "bg-gray-900 text-white hover:bg-black"
+                  }`}
+                >
+                  {isAdded ? (
+                    <>
+                      <span>✓</span> Added to Cart
+                    </>
+                  ) : (
+                    "Add to Cart"
+                  )}
                 </button>
               </div>
             </div>

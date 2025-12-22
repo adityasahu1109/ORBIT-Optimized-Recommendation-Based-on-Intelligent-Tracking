@@ -46,7 +46,7 @@ class PopularityRecommender:
         Used for Cold Start (New Users).
         """
         top_items = self.df.head(k)
-        return top_items[['asin', 'title', 'categoryName', 'price', 'stars', 'reviews']].to_dict(orient='records')
+        return top_items[['asin', 'title', 'categoryName', 'price', 'stars', 'reviews', 'imgUrl']].to_dict(orient='records')
 
 # Quick test if running this file directly
 if __name__ == "__main__":

@@ -29,6 +29,9 @@ class ProductResponse(BaseModel):
     title: str
     category: str
     price: float
+    imgUrl: str = ""      # <--- Ensure this exists
+    stars: float = 0.0    # <--- Ensure this exists
+    reviews: int = 0      # <--- Ensure this exists
     score: float
     reason: str  # Explain WHY we recommended this (e.g., "Popularity", "Because you viewed X")
 

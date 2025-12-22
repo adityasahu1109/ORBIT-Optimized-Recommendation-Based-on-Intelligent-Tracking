@@ -49,8 +49,6 @@ class ContentEngine:
             print("✅ Model saved.")
 
         # --- TENSOR PREP ---
-        # We do this part every time because moving data to GPU is fast,
-        # but pickling GPU tensors can sometimes cause errors across different machines.
         print("Moving data to GPU...")
         tfidf_dense = self.tfidf_matrix.toarray()
         self.tfidf_tensor = torch.tensor(tfidf_dense, dtype=torch.float32).to(self.device)
@@ -63,7 +61,8 @@ class ContentEngine:
         query = query.lower()
         results = self.df[self.df['title'].str.lower().str.contains(query, na=False)]
         results = results.sort_values(by='reviews', ascending=False).head(k)
-        return results[['asin', 'title', 'categoryName', 'price', 'stars', 'reviews']].to_dict(orient='records')
+        # FIX: Added 'imgUrl' to the returned fields
+        return results[['asin', 'title', 'categoryName', 'price', 'stars', 'reviews', 'imgUrl']].to_dict(orient='records')
 
     def find_similar_products(self, product_id, k=5):
         """
@@ -89,9 +88,16 @@ class ContentEngine:
         results = []
         for i in range(1, len(indices)):
             item_idx = indices[i]
+            # --- FIX: Fetch full row data (Price, Image, Stars) ---
+            row = self.df.iloc[item_idx]
             results.append({
-                "asin": self.df.iloc[item_idx]['asin'],
-                "title": self.df.iloc[item_idx]['title'],
+                "asin": row['asin'],
+                "title": row['title'],
+                "category": row['categoryName'],
+                "price": row['price'],
+                "imgUrl": row['imgUrl'],
+                "stars": row['stars'],
+                "reviews": row['reviews'],
                 "score": float(scores[i])
             })
             
@@ -99,5 +105,4 @@ class ContentEngine:
 
 # Quick Test
 if __name__ == "__main__":
-    # First run will be slow (Training), Second run will be fast (Loading)
     engine = ContentEngine()

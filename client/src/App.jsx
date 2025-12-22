@@ -3,7 +3,8 @@ import { Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import ProductDetails from './pages/ProductDetails';
-import SearchResults from './pages/SearchResults'; // <--- 1. Import this!
+import SearchResults from './pages/SearchResults';
+import Cart from './pages/Cart'; // <--- Import Cart
 import Footer from './components/Footer';
 
 function App() {
@@ -14,8 +15,8 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/product/:asin" element={<ProductDetails />} />
-          {/* 2. Add this Route below! */}
-          <Route path="/search" element={<SearchResults />} /> 
+          <Route path="/search" element={<SearchResults />} />
+          <Route path="/cart" element={<Cart />} /> {/* <--- Add Route */}
         </Routes>
       </main>
       <Footer />
