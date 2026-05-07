@@ -76,10 +76,10 @@ def get_recommendations(req: schemas.RecommendationRequest, db: Session = Depend
                 asin=item['asin'],
                 title=item['title'],
                 category=item.get('category', 'Unknown'), 
-                price=item.get('price', 0.0),       # Fix: Use real price
-                imgUrl=item.get('imgUrl', ""),      # Fix: Use real image
-                stars=item.get('stars', 0.0),       # Fix: Use real stars
-                reviews=item.get('reviews', 0),     # Fix: Use real reviews
+                price=item.get('price', 0.0),      
+                imgUrl=item.get('imgUrl', ""),      
+                stars=item.get('stars', 0.0),     
+                reviews=item.get('reviews', 0),     
                 score=item['score'],
                 reason="Similar to viewed product"
             ))
