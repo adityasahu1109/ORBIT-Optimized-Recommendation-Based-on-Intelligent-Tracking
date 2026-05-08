@@ -3,74 +3,66 @@ import { Link } from 'react-router-dom';
 
 const Footer = () => {
   return (
-    <footer className="bg-white border-t border-gray-200 pt-12 pb-8 mt-auto">
+    <footer className="bg-slate-900 text-slate-400 pt-12 pb-8 mt-auto border-t border-slate-800">
       <div className="container mx-auto px-4">
-        
-        {/* Top Section: Grid Layout */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-          
-          {/* Column 1: Brand & About */}
+          {/* Brand */}
           <div>
             <div className="flex items-center gap-2 mb-4">
               <span className="text-2xl">🪐</span>
-              <span className="text-xl font-bold text-gray-900 tracking-tight">
-                ORBIT
-              </span>
+              <span className="text-xl font-bold text-white tracking-tight">ORBIT</span>
             </div>
-            <p className="text-gray-500 text-sm leading-relaxed max-w-xs">
-              An intelligent e-commerce demonstration powered by Machine Learning. 
-              Featuring Content-Based Filtering, Collaborative Filtering, and Popularity engines.
+            <p className="text-sm leading-relaxed max-w-xs">
+              An intelligent e-commerce recommendation engine powered by SVD Collaborative Filtering,
+              TF-IDF Content Similarity, and Popularity-based ranking.
             </p>
           </div>
 
-          {/* Column 2: Quick Links */}
+          {/* Links */}
           <div>
-            <h3 className="text-gray-900 font-semibold mb-4">Explore</h3>
-            <ul className="space-y-2 text-sm text-gray-600">
+            <h3 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">Explore</h3>
+            <ul className="space-y-2 text-sm">
               <li>
-                <Link to="/" className="hover:text-blue-600 transition-colors">
+                <Link to="/" className="hover:text-indigo-400 transition-colors">
                   Home & Recommendations
                 </Link>
               </li>
               <li>
-                <Link to="/cart" className="hover:text-blue-600 transition-colors">
+                <Link to="/cart" className="hover:text-indigo-400 transition-colors">
                   Shopping Cart
                 </Link>
               </li>
               <li>
-                <Link to="/search?q=electronics" className="hover:text-blue-600 transition-colors">
+                <Link to="/search?q=electronics" className="hover:text-indigo-400 transition-colors">
                   Search Products
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Column 3: Connect (Simulated) */}
+          {/* Tech */}
           <div>
-            <h3 className="text-gray-900 font-semibold mb-4">Connect</h3>
-            <ul className="space-y-2 text-sm text-gray-600">
-              <li className="flex items-center gap-2">
-                <span>GitHub:</span>
-                <a href="#" className="text-blue-600 hover:underline">/orbit-recommender</a>
-              </li>
-              <li className="flex items-center gap-2">
-                <span>Email:</span>
-                <a href="mailto:dev@example.com" className="text-blue-600 hover:underline">dev@example.com</a>
-              </li>
-            </ul>
+            <h3 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">Built With</h3>
+            <div className="flex flex-wrap gap-2">
+              {['FastAPI', 'Surprise SVD', 'scikit-learn', 'React', 'TailwindCSS', 'SQLite'].map((tech) => (
+                <span
+                  key={tech}
+                  className="bg-slate-800 text-slate-300 text-xs px-2.5 py-1 rounded-full border border-slate-700"
+                >
+                  {tech}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Divider */}
-        <hr className="border-gray-100 my-8" />
+        <hr className="border-slate-800 my-8" />
 
-        {/* Bottom Section: Copyright */}
-        <div className="flex flex-col md:flex-row justify-between items-center text-xs text-gray-400">
+        <div className="flex flex-col md:flex-row justify-between items-center text-xs text-slate-500">
           <p>© {new Date().getFullYear()} ORBIT Recommender. Built for educational purposes.</p>
-          <div className="flex gap-4 mt-4 md:mt-0">
-            <span className="hover:text-gray-600 cursor-pointer">Privacy Policy</span>
-            <span className="hover:text-gray-600 cursor-pointer">Terms of Service</span>
-          </div>
+          <p className="mt-2 md:mt-0">
+            Train-once architecture · SVD + TF-IDF + Popularity hybrid engine
+          </p>
         </div>
       </div>
     </footer>

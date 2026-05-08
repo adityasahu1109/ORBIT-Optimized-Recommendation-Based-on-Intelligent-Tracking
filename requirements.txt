@@ -1,3 +1,7 @@
+# ══════════════════════════════════════════════
+# ORBIT Recommender — Python Dependencies
+# ══════════════════════════════════════════════
+
 # Data Manipulation
 pandas
 numpy
@@ -5,15 +9,14 @@ numpy
 # Machine Learning & Recommender Systems
 scikit-learn
 scikit-surprise
-torch  # Added for GPU acceleration
 
 # Backend API
 fastapi
-uvicorn
+uvicorn[standard]
 pydantic
 
 # Database
 sqlalchemy
 
-# Utilities
+# Serialization
 joblib

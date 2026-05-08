@@ -1,161 +1,161 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import RecommendationSection from '../components/RecommendationSection';
+import { useUser } from '../context/UserContext';
 import { getRecommendations, logInteraction } from '../services/api';
+import ProductGrid from '../components/ProductGrid';
+import LoadingSkeleton from '../components/LoadingSkeleton';
+import { ArrowLeft, ShoppingCart, Check, Star, Tag } from 'lucide-react';
 
 const ProductDetails = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { product, userId } = location.state || {}; 
+  const { userId, addToCart } = useUser();
+  const { product } = location.state || {};
 
   const [similarProducts, setSimilarProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  
-  // State for visual feedback on button
   const [isAdded, setIsAdded] = useState(false);
 
-  // --- RESTORED HELPER FUNCTION ---
-  // This ensures images don't break if the URL is missing or "0"
   const getValidImage = (url, title) => {
-    if (!url || url === "0" || !url.startsWith("http")) {
-      const safeTitle = title.split(",")[0].trim().substring(0, 20).replace(/\s/g, "+");
-      return `https://placehold.co/400x300/EEE/31343C?text=${safeTitle}`;
+    if (!url || url === '0' || !String(url).startsWith('http')) {
+      const safeTitle = title.split(',')[0].trim().substring(0, 20).replace(/\s/g, '+');
+      return `https://placehold.co/500x400/1e293b/94a3b8?text=${safeTitle}`;
     }
     return url;
   };
 
-  // Redirect if accessed directly without state
+  // Redirect if no product data
   useEffect(() => {
-    if (!product) {
-      navigate('/');
-    }
+    if (!product) navigate('/');
   }, [product, navigate]);
 
-  // Fetch Data & Log View
+  // Fetch similar products and log view
   useEffect(() => {
     if (product && userId) {
       const loadData = async () => {
         setLoading(true);
-        // 1. Log that the user viewed this
         await logInteraction(userId, product.asin, 'view');
-        
-        // 2. Get Context-Aware Recommendations
-        const results = await getRecommendations(userId, product.asin);
-        setSimilarProducts(results);
-        
+        const data = await getRecommendations(userId, product.asin);
+        setSimilarProducts(data.recommendations);
         setLoading(false);
       };
-
       loadData();
     }
   }, [product, userId]);
 
-  // --- ADD TO CART LOGIC ---
   const handleAddToCart = async () => {
     if (!isAdded) {
-      // 1. Send specific "add_to_cart" signal to backend (Weight: 3.0)
       await logInteraction(userId, product.asin, 'add_to_cart');
-      
-      // 2. Save to Browser LocalStorage
-      const existingCart = JSON.parse(localStorage.getItem('orbit_cart')) || [];
-      
-      // Check for duplicates
-      if (!existingCart.find(item => item.asin === product.asin)) {
-        const newCart = [...existingCart, product];
-        localStorage.setItem('orbit_cart', JSON.stringify(newCart));
-      }
-
-      // 3. Show visual feedback
+      addToCart(product);
       setIsAdded(true);
-      
-      // 4. Reset button after 2 seconds
-      setTimeout(() => setIsAdded(false), 2000);
+      setTimeout(() => setIsAdded(false), 2500);
     }
   };
 
   if (!product) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20 pt-8">
-      <div className="container mx-auto px-4">
-        
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white pb-20">
+      <div className="container mx-auto px-4 pt-8">
+
         {/* Back Button */}
-        <button 
-          onClick={() => navigate(-1)} 
-          className="mb-6 text-gray-500 hover:text-gray-900 flex items-center gap-2"
+        <button
+          onClick={() => navigate(-1)}
+          className="mb-6 text-slate-500 hover:text-slate-900 flex items-center gap-2 group text-sm font-medium"
         >
-          &larr; Back to Feed
+          <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+          Back
         </button>
 
-        {/* Main Product Layout */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-12">
+        {/* Product Detail Card */}
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden mb-12">
           <div className="flex flex-col md:flex-row">
-            
-            {/* Left: Image (Now using getValidImage!) */}
-            <div className="md:w-1/3 bg-gray-100 p-8 flex items-center justify-center">
-              <img 
-                src={getValidImage(product.imgUrl, product.title)} 
-                alt={product.title} 
-                className="max-w-full max-h-96 object-contain mix-blend-multiply"
+
+            {/* Image */}
+            <div className="md:w-2/5 bg-slate-50 p-10 flex items-center justify-center relative">
+              <img
+                src={getValidImage(product.imgUrl, product.title)}
+                alt={product.title}
+                className="max-w-full max-h-96 object-contain"
               />
             </div>
 
-            {/* Right: Details */}
-            <div className="md:w-2/3 p-8">
-              <div className="mb-2">
-                <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full font-bold uppercase tracking-wide">
-                  {product.category || "Product"}
+            {/* Details */}
+            <div className="md:w-3/5 p-8 lg:p-10">
+              {/* Category Badge */}
+              <div className="mb-3">
+                <span className="inline-flex items-center gap-1 bg-indigo-50 text-indigo-700 text-xs px-3 py-1 rounded-full font-semibold uppercase tracking-wide">
+                  <Tag size={12} />
+                  {product.category || product.categoryName || 'Product'}
                 </span>
               </div>
-              
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">{product.title}</h1>
-              
+
+              <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 mb-4 leading-tight">
+                {product.title}
+              </h1>
+
+              {/* Rating & Reviews */}
               <div className="flex items-center gap-4 mb-6">
-                <span className="text-2xl font-bold text-green-600">${product.price || 'N/A'}</span>
-                <div className="flex items-center text-yellow-500">
-                  <span className="text-xl">★</span>
-                  <span className="ml-1 text-gray-700 font-medium">{product.stars}</span>
-                  <span className="text-gray-400 text-sm ml-1">({product.reviews} reviews)</span>
+                <div className="flex items-center gap-1.5 bg-amber-50 px-3 py-1.5 rounded-lg">
+                  <Star size={16} fill="#f59e0b" className="text-amber-500" />
+                  <span className="font-bold text-slate-800">{product.stars}</span>
                 </div>
+                <span className="text-slate-400 text-sm">
+                  {(product.reviews || 0).toLocaleString()} reviews
+                </span>
               </div>
 
-              <div className="border-t border-gray-100 pt-6 mt-6">
-                <p className="text-gray-600 leading-relaxed mb-6">
-                  This product was recommended because: <span className="font-semibold text-blue-600">{product.reason || "It matches your profile"}</span>.
-                </p>
-                
-                {/* Interactive Button */}
-                <button 
-                  onClick={handleAddToCart}
-                  className={`px-8 py-3 rounded-lg transition-all text-lg font-medium w-full md:w-auto flex items-center justify-center gap-2 ${
-                    isAdded 
-                      ? "bg-green-600 text-white hover:bg-green-700" 
-                      : "bg-gray-900 text-white hover:bg-black"
-                  }`}
-                >
-                  {isAdded ? (
-                    <>
-                      <span>✓</span> Added to Cart
-                    </>
-                  ) : (
-                    "Add to Cart"
-                  )}
-                </button>
+              {/* Price */}
+              <div className="mb-8">
+                <span className="text-3xl font-bold text-slate-900">${product.price || 'N/A'}</span>
               </div>
+
+              {/* Reason */}
+              {product.reason && (
+                <div className="bg-slate-50 rounded-xl p-4 mb-8 border border-slate-100">
+                  <p className="text-sm text-slate-600">
+                    <span className="font-semibold text-indigo-600">Why this?</span>{' '}
+                    {product.reason}
+                  </p>
+                </div>
+              )}
+
+              {/* Add to Cart Button */}
+              <button
+                onClick={handleAddToCart}
+                className={`px-8 py-3.5 rounded-xl transition-all text-base font-semibold w-full md:w-auto flex items-center justify-center gap-2.5 shadow-lg ${
+                  isAdded
+                    ? 'bg-emerald-600 text-white shadow-emerald-200 hover:bg-emerald-700'
+                    : 'bg-slate-900 text-white shadow-slate-300 hover:bg-slate-800 hover:shadow-xl'
+                }`}
+              >
+                {isAdded ? (
+                  <>
+                    <Check size={18} /> Added to Cart
+                  </>
+                ) : (
+                  <>
+                    <ShoppingCart size={18} /> Add to Cart
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>
 
-        {/* "Similar Items" Section */}
+        {/* Similar Products */}
         {loading ? (
-          <div className="text-center py-10">Loading similar items...</div>
+          <div>
+            <h2 className="text-2xl font-bold text-slate-800 mb-6">People who viewed this also liked</h2>
+            <LoadingSkeleton count={4} />
+          </div>
         ) : (
-          <RecommendationSection 
-            title="People who viewed this also liked" 
-            products={similarProducts} 
+          <ProductGrid
+            title="People who viewed this also liked"
+            products={similarProducts}
+            strategy="content_based"
           />
         )}
-        
       </div>
     </div>
   );
