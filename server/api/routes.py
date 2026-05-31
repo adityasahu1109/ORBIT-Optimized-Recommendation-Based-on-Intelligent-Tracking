@@ -78,7 +78,7 @@ def search_products(query: str = ""):
     if not query.strip():
         return {"query": query, "results": []}
 
-    results = _search_engine.search(query, k=20)
+    results = _search_engine.search(query, k=40)
     return {"query": query, "results": results}
 
 

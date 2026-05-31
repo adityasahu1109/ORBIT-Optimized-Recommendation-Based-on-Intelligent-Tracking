@@ -3,7 +3,10 @@ import { useUser } from '../context/UserContext';
 import { getRecommendations } from '../services/api';
 import ProductGrid from '../components/ProductGrid';
 import LoadingSkeleton from '../components/LoadingSkeleton';
-import { Sparkles, Zap, Users } from 'lucide-react';
+import { Sparkles, Zap, Users, ChevronDown } from 'lucide-react';
+
+const INITIAL_DISPLAY = 8;
+const LOAD_MORE_COUNT = 8;
 
 const Home = () => {
   const { userId } = useUser();
@@ -11,11 +14,13 @@ const Home = () => {
   const [strategy, setStrategy] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [visibleCount, setVisibleCount] = useState(INITIAL_DISPLAY);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       setError(null);
+      setVisibleCount(INITIAL_DISPLAY);
       try {
         const data = await getRecommendations(userId);
         setRecommendations(data.recommendations);
@@ -45,6 +50,8 @@ const Home = () => {
   };
 
   const info = strategyInfo[strategy] || strategyInfo.personalized;
+  const visibleProducts = recommendations.slice(0, visibleCount);
+  const hasMore = visibleCount < recommendations.length;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white pb-20">
@@ -99,17 +106,35 @@ const Home = () => {
               </button>
             </div>
           </div>
-        ) : recommendations.length > 0 ? (
-          <ProductGrid
-            title={strategy === 'cold_start' ? '🔥 Trending Now' : '✨ Top Picks for You'}
-            subtitle={
-              strategy === 'personalized'
-                ? 'Blending your preferences with overall product quality'
-                : 'Most popular products across all categories'
-            }
-            products={recommendations}
-            strategy={strategy}
-          />
+        ) : visibleProducts.length > 0 ? (
+          <>
+            <ProductGrid
+              title={strategy === 'cold_start' ? '🔥 Trending Now' : '✨ Top Picks for You'}
+              subtitle={
+                strategy === 'personalized'
+                  ? 'Blending your preferences with overall product quality'
+                  : 'Most popular products across all categories'
+              }
+              products={visibleProducts}
+              strategy={strategy}
+            />
+
+            {/* Show More Button */}
+            {hasMore && (
+              <div className="flex justify-center mt-8">
+                <button
+                  onClick={() => setVisibleCount(prev => prev + LOAD_MORE_COUNT)}
+                  className="group flex items-center gap-2 px-8 py-3 bg-white border-2 border-indigo-200 text-indigo-700 rounded-xl font-semibold text-sm hover:bg-indigo-50 hover:border-indigo-400 transition-all duration-200 shadow-sm hover:shadow-md"
+                >
+                  Show More Products
+                  <ChevronDown size={18} className="group-hover:translate-y-0.5 transition-transform" />
+                  <span className="text-indigo-400 font-normal ml-1">
+                    ({recommendations.length - visibleCount} remaining)
+                  </span>
+                </button>
+              </div>
+            )}
+          </>
         ) : (
           <div className="text-center py-20 text-slate-500">
             <p className="text-xl mb-2">No recommendations available</p>

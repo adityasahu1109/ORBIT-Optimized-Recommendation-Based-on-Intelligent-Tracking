@@ -8,7 +8,7 @@ export const getRecommendations = async (userId, productIdViewed = null) => {
   try {
     const payload = {
       user_id: userId,
-      n_recommendations: 8,
+      n_recommendations: 20,
     };
 
     if (productIdViewed) {
